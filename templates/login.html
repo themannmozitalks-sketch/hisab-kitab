@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Login • Hisab Kitab</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="auth-card">
+      <h1>Hisab Kitab</h1>
+      <p class="muted">Login to continue</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat,msg in messages %}
+            <div class="flash {{cat}}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <label>Email</label>
+        <input name="email" type="email" placeholder="you@email.com" required>
+
+        <label>Password</label>
+        <input name="password" type="password" placeholder="••••••••" required>
+
+        <button class="btn primary w100" type="submit">Login</button>
+      </form>
+
+      <p class="muted mt10">New user? <a href="{{ url_for('signup') }}">Create account</a></p>
+    </div>
+  </div>
+</body>
+</html>

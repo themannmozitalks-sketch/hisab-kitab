@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Settings • Hisab Kitab</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <div>
+        <div class="title">Settings</div>
+        <div class="sub">Branding + Logo + GSTIN</div>
+      </div>
+      <div class="top-actions">
+        <a class="btn" href="{{ url_for('index') }}">← Back</a>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for cat,msg in messages %}
+            <div class="flash {{cat}}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form class="card" method="POST" enctype="multipart/form-data">
+      <div class="grid2">
+        <div>
+          <label>Business Name</label>
+          <input name="business_name" value="{{ s.business_name if s else '' }}" placeholder="Hisab Kitab">
+          <label>Email</label>
+          <input name="email" value="{{ s.email if s else '' }}">
+          <label>Phone</label>
+          <input name="phone" value="{{ s.phone if s else '' }}">
+        </div>
+        <div>
+          <label>Address</label>
+          <input name="address" value="{{ s.address if s else '' }}">
+          <label>GSTIN</label>
+          <input name="gstin" value="{{ s.gstin if s else '' }}">
+          <label>Logo (PNG/JPG/SVG)</label>
+          <input type="file" name="logo">
+          {% if s and s.logo_path %}
+            <div class="mt10">
+              <div class="muted">Current Logo:</div>
+              <img src="{{ s.logo_path }}" style="height:60px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);padding:6px;background:rgba(255,255,255,0.06);">
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="row right mt10">
+        <button class="btn primary" type="submit">Save Settings</button>
+      </div>
+    </form>
+
+    <footer class="foot">Logo will appear on PDF invoices ✅</footer>
+  </div>
+</body>
+</html>
