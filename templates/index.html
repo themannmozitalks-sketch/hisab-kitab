@@ -10,11 +10,9 @@
     <header class="top">
       <div>
         <div class="title">Hisab Kitab</div>
-        <div class="sub">Welcome, {{ user_name }} • Invoices</div>
+        <div class="sub">Invoices</div>
       </div>
       <div class="top-actions">
-        <a class="btn" href="{{ url_for('clients') }}">Clients</a>
-        <a class="btn" href="{{ url_for('settings') }}">Settings</a>
         <a class="btn primary" href="{{ url_for('new_invoice') }}">+ New Invoice</a>
         <a class="btn danger" href="{{ url_for('logout') }}">Logout</a>
       </div>
@@ -56,9 +54,6 @@
                 <td class="actions">
                   <a class="btn" href="{{ url_for('view_invoice', invoice_id=inv.id) }}">View</a>
                   <a class="btn" href="{{ url_for('invoice_pdf', invoice_id=inv.id) }}">PDF</a>
-                  <form method="POST" action="{{ url_for('delete_invoice', invoice_id=inv.id) }}" style="display:inline;">
-                    <button class="btn danger" type="submit" onclick="return confirm('Delete invoice?')">Delete</button>
-                  </form>
                 </td>
               </tr>
             {% endfor %}
@@ -67,7 +62,7 @@
       {% endif %}
     </div>
 
-    <footer class="foot">Hisab Kitab • Product v1</footer>
+    <footer class="foot">Hisab Kitab • Live</footer>
   </div>
 </body>
 </html>
