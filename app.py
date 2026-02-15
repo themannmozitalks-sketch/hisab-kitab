@@ -20,7 +20,13 @@ app = Flask(__name__)
 app.secret_key = os.getenv("HK_SECRET_KEY", "hisab-kitab-dev-key")
 
 BASE_DIR = os.path.dirname(__file__)
-DB_PATH = os.path.join(BASE_DIR, "hisabkitab.db")
+
+# Render safe DB location:
+# - If you add a Render Disk later, it exposes RENDER_DISK_PATH
+# - Otherwise /tmp is writable (but resets on redeploy)
+DATA_DIR = os.getenv("RENDER_DISK_PATH", "/tmp")
+DB_PATH = os.path.join(DATA_DIR, "hisabkitab.db")
+b.db")
 
 
 # -------------------- DB helpers --------------------
