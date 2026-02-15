@@ -2,85 +2,121 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>{{ inv.invoice_no }} • Hisab Kitab</title>
+  <title>New Invoice • Hisab Kitab</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <div class="shell">
     <header class="top">
       <div>
-        <div class="title">Invoice {{ inv.invoice_no }}</div>
-        <div class="sub">Date: {{ inv.invoice_date }}</div>
+        <div class="title">Create Invoice</div>
+        <div class="sub">Proper calculation (Decimal) ✅</div>
       </div>
       <div class="top-actions">
         <a class="btn" href="{{ url_for('index') }}">← Back</a>
-        <a class="btn primary" href="{{ url_for('invoice_pdf', invoice_id=inv.id) }}">Download PDF</a>
       </div>
     </header>
 
-    <div class="card">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for cat,msg in messages %}
+            <div class="flash {{cat}}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form class="card" method="POST">
+      <div class="grid2">
+        <div>
+          <label>Invoice No</label>
+          <input name="invoice_no" value="{{ invoice_no }}" required>
+        </div>
+        <div>
+          <label>Date</label>
+          <input type="date" name="invoice_date" value="{{ today }}" required>
+        </div>
+      </div>
+
       <div class="grid2">
         <div>
           <div class="card-head">From</div>
-          <div class="kv"><b>{{ inv.from_name }}</b></div>
-          {% if inv.from_address %}<div class="kv">Address: {{ inv.from_address }}</div>{% endif %}
-          {% if inv.from_email %}<div class="kv">Email: {{ inv.from_email }}</div>{% endif %}
-          {% if inv.from_phone %}<div class="kv">Phone: {{ inv.from_phone }}</div>{% endif %}
-          {% if inv.from_gstin %}<div class="kv">GSTIN: {{ inv.from_gstin }}</div>{% endif %}
+          <label>Name*</label>
+          <input name="from_name" required>
+          <label>Email</label>
+          <input name="from_email">
+          <label>Phone</label>
+          <input name="from_phone">
         </div>
+
         <div>
           <div class="card-head">To</div>
-          <div class="kv"><b>{{ inv.to_name }}</b></div>
-          {% if inv.to_address %}<div class="kv">Address: {{ inv.to_address }}</div>{% endif %}
-          {% if inv.to_email %}<div class="kv">Email: {{ inv.to_email }}</div>{% endif %}
-          {% if inv.to_phone %}<div class="kv">Phone: {{ inv.to_phone }}</div>{% endif %}
-          {% if inv.to_gstin %}<div class="kv">GSTIN: {{ inv.to_gstin }}</div>{% endif %}
+          <label>Client Name*</label>
+          <input name="to_name" required>
+          <label>Client Email</label>
+          <input name="to_email">
+          <label>Client Phone</label>
+          <input name="to_phone">
         </div>
       </div>
 
-      {% if inv.place_of_supply %}
-        <div class="kv mt10"><b>Place of Supply:</b> {{ inv.place_of_supply }}</div>
-      {% endif %}
-
-      <div class="card-head">Items</div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th class="num">Qty</th>
-            <th class="num">Rate</th>
-            <th class="num">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for it in items %}
-            <tr>
-              <td>{{ it.description }}</td>
-              <td class="num">{{ "%.2f"|format(it.qty) }}</td>
-              <td class="num">{{ "%.2f"|format(it.rate) }}</td>
-              <td class="num">{{ "%.2f"|format(it.qty * it.rate) }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-      <div class="totals">
-        <div>Subtotal</div><div class="num">{{ "%.2f"|format(subtotal) }}</div>
-
-        {% if inv.gst_mode == 1 %}
-          <div>GST ({{ "%.2f"|format(inv.gst_rate) }}%)</div><div class="num">{{ "%.2f"|format(gst_amount) }}</div>
-        {% endif %}
-
-        <div class="grand">TOTAL</div><div class="num grand">{{ "%.2f"|format(total) }}</div>
+      <div class="card-head">GST</div>
+      <div class="grid2">
+        <div>
+          <label><input type="checkbox" name="gst_mode"> Enable GST</label>
+        </div>
+        <div>
+          <label>GST Rate (%)</label>
+          <input name="gst_rate" value="18" placeholder="18">
+        </div>
       </div>
 
-      {% if inv.notes %}
-        <div class="card-head">Notes</div>
-        <div class="notes">{{ inv.notes }}</div>
-      {% endif %}
-    </div>
+      <div class="card-head">Items</div>
 
-    <footer class="foot">Hisab Kitab • v1</footer>
+      <div id="items">
+        <div class="item-row">
+          <input name="desc[]" placeholder="Description" required>
+          <input name="qty[]" type="number" step="0.01" value="1" required>
+          <input name="rate[]" type="number" step="0.01" value="0" required>
+          <button class="btn danger" type="button" onclick="removeRow(this)">X</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn" type="button" onclick="addRow()">+ Add Item</button>
+      </div>
+
+      <label>Notes</label>
+      <textarea name="notes" rows="4" placeholder="Payment details, thank you, etc."></textarea>
+
+      <div class="row right mt10">
+        <button class="btn primary" type="submit">Save Invoice</button>
+      </div>
+    </form>
+
+    <footer class="foot">Tip: Qty/Rate me comma मत डालना (1000 लिखो, 1,000 नहीं).</footer>
   </div>
+
+<script>
+  function addRow(){
+    const wrap = document.getElementById("items");
+    const div = document.createElement("div");
+    div.className = "item-row";
+    div.innerHTML = `
+      <input name="desc[]" placeholder="Description" required>
+      <input name="qty[]" type="number" step="0.01" value="1" required>
+      <input name="rate[]" type="number" step="0.01" value="0" required>
+      <button class="btn danger" type="button" onclick="removeRow(this)">X</button>
+    `;
+    wrap.appendChild(div);
+  }
+
+  function removeRow(btn){
+    const wrap = document.getElementById("items");
+    if (wrap.children.length <= 1) return alert("At least 1 item required.");
+    btn.parentElement.remove();
+  }
+</script>
 </body>
 </html>
